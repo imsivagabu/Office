@@ -1,0 +1,578 @@
+import React, { useState } from 'react';
+import { 
+  ComposedChart, LineChart, Line, BarChart, Bar, XAxis, YAxis, 
+  CartesianGrid, Tooltip, Legend, ResponsiveContainer 
+} from 'recharts';
+import { 
+  TrendingUp, TrendingDown, Activity, BarChart2, AlertCircle, Map, 
+  CheckCircle2, CreditCard, GitCompare, MapPin, Lightbulb, FileText 
+} from 'lucide-react';
+
+// --- DATA DEFINITIONS ---
+const stateData = [
+  { week: 'Week 1', del: 811057, total: 1050824, conv: 77.18 },
+  { week: 'Week 2', del: 1563071, total: 1960930, conv: 79.71 },
+  { week: 'Week 3', del: 1287832, total: 1718685, conv: 74.93 },
+  { week: 'Week 4', del: 1412024, total: 1833745, conv: 77.00 },
+  { week: 'Week 5', del: 1263433, total: 1639701, conv: 77.05 },
+  { week: 'Week 6', del: 1375951, total: 1747954, conv: 78.72 },
+  { week: 'Week 7', del: 1404695, total: 1777315, conv: 79.03 },
+];
+
+const regionData = [
+  { week: 'Week 1', 'Andhra-1': 78.25, 'Andhra-2': 75.11, 'Andhra-3': 76.43 },
+  { week: 'Week 2', 'Andhra-1': 81.00, 'Andhra-2': 77.45, 'Andhra-3': 78.47 },
+  { week: 'Week 3', 'Andhra-1': 74.30, 'Andhra-2': 74.42, 'Andhra-3': 76.24 },
+  { week: 'Week 4', 'Andhra-1': 77.06, 'Andhra-2': 75.69, 'Andhra-3': 77.60 },
+  { week: 'Week 5', 'Andhra-1': 77.06, 'Andhra-2': 75.88, 'Andhra-3': 77.63 },
+  { week: 'Week 6', 'Andhra-1': 78.87, 'Andhra-2': 77.72, 'Andhra-3': 78.97 },
+  { week: 'Week 7', 'Andhra-1': 79.36, 'Andhra-2': 77.85, 'Andhra-3': 79.11 },
+];
+
+const prepaidStateData = [
+  { week: 'Week 1', del: 295977, total: 313231, conv: 94.49 },
+  { week: 'Week 2', del: 598122, total: 626912, conv: 95.41 },
+  { week: 'Week 3', del: 495039, total: 536023, conv: 92.35 },
+  { week: 'Week 4', del: 561905, total: 596864, conv: 94.14 },
+  { week: 'Week 5', del: 489859, total: 519293, conv: 94.33 },
+  { week: 'Week 6', del: 537073, total: 564374, conv: 95.16 },
+  { week: 'Week 7', del: 568749, total: 599341, conv: 94.90 },
+];
+
+const prepaidRegionData = [
+  { week: 'Week 1', 'Andhra-1': 94.90, 'Andhra-2': 93.57, 'Andhra-3': 94.24 },
+  { week: 'Week 2', 'Andhra-1': 95.80, 'Andhra-2': 94.70, 'Andhra-3': 95.02 },
+  { week: 'Week 3', 'Andhra-1': 91.56, 'Andhra-2': 92.90, 'Andhra-3': 93.44 },
+  { week: 'Week 4', 'Andhra-1': 93.98, 'Andhra-2': 93.85, 'Andhra-3': 94.57 },
+  { week: 'Week 5', 'Andhra-1': 94.07, 'Andhra-2': 94.41, 'Andhra-3': 94.73 },
+  { week: 'Week 6', 'Andhra-1': 94.95, 'Andhra-2': 94.99, 'Andhra-3': 95.60 },
+  { week: 'Week 7', 'Andhra-1': 94.81, 'Andhra-2': 94.52, 'Andhra-3': 95.22 },
+];
+
+const modelData = [
+  { week: 'Week 1', DH_Conv: 77.21, MDH_Conv: 76.50, ODH_Conv: 77.17, DH_Del: 634164, MDH_Del: 24739, ODH_Del: 152154 },
+  { week: 'Week 2', DH_Conv: 79.87, MDH_Conv: 79.06, ODH_Conv: 79.14, DH_Del: 1225724, MDH_Del: 48826, ODH_Del: 288521 },
+  { week: 'Week 3', DH_Conv: 75.06, MDH_Conv: 73.62, ODH_Conv: 74.66, DH_Del: 1000163, MDH_Del: 42431, ODH_Del: 245238 },
+  { week: 'Week 4', DH_Conv: 77.07, MDH_Conv: 76.19, ODH_Conv: 76.86, DH_Del: 1096006, MDH_Del: 45364, ODH_Del: 270654 },
+  { week: 'Week 5', DH_Conv: 77.17, MDH_Conv: 76.96, ODH_Conv: 76.61, DH_Del: 981847, MDH_Del: 40663, ODH_Del: 240923 },
+  { week: 'Week 6', DH_Conv: 78.88, MDH_Conv: 77.82, ODH_Conv: 78.21, DH_Del: 1076116, MDH_Del: 42846, ODH_Del: 256989 },
+  { week: 'Week 7', DH_Conv: 79.24, MDH_Conv: 78.68, ODH_Conv: 78.24, DH_Del: 1096515, MDH_Del: 44141, ODH_Del: 264039 },
+];
+
+const chronicHubs = [
+  { name: 'GovernorpetODH_GOV', data: [74.57, 76.17, 72.16, 74.04, 73.82, 75.03, 74.65], color: '#3b82f6', key: 'GOV' },
+  { name: 'VijayawadaSplitODH_VJA1', data: [72.79, 73.54, 63.62, 65.48, 58.82, 66.08, 67.03], color: '#ef4444', key: 'VJA1' },
+  { name: 'VijayawadaSplitODH_VJA2', data: [69.36, 72.45, 59.23, 64.02, 62.18, 63.54, 61.95], color: '#f97316', key: 'VJA2' },
+  { name: 'GannavaramHub_GVM', data: [71.74, 67.88, 62.42, 64.42, 65.18, 65.99, 64.61], color: '#eab308', key: 'GVM' },
+  { name: 'IbrahimpatnamHub_IBM', data: [72.08, 77.16, 72.10, 74.81, 73.88, 71.24, 74.31], color: '#8b5cf6', key: 'IBM' },
+  { name: 'VijayawadaHub_VJA', data: [71.84, 77.26, 71.95, 76.17, 76.55, 77.20, 76.59], color: '#10b981', key: 'VJA' }
+];
+
+// Transform chronic hubs for Recharts
+const vjaChartData = [1, 2, 3, 4, 5, 6, 7].map(weekNum => {
+  let weekObj = { week: `Week ${weekNum}` };
+  chronicHubs.forEach(hub => {
+    weekObj[hub.key] = hub.data[weekNum - 1];
+  });
+  return weekObj;
+});
+
+export default function App() {
+  const [activeTab, setActiveTab] = useState('overall');
+
+  // KPI Calculations
+  const activeData = activeTab === 'prepaid' ? prepaidStateData : stateData;
+  const totalDel = activeData.reduce((acc, curr) => acc + curr.del, 0);
+  const totalVol = activeData.reduce((acc, curr) => acc + curr.total, 0);
+  const weightedAvgConv = ((totalDel / totalVol) * 100).toFixed(2);
+  const currentWeek = activeData[activeData.length - 1];
+  
+  const peakConvData = [...activeData].sort((a, b) => b.conv - a.conv)[0];
+
+  // Formatting helpers
+  const formatVol = (val) => val >= 1000000 ? `${(val / 1000000).toFixed(1)}M` : val >= 1000 ? `${(val / 1000).toFixed(0)}K` : val;
+  const formatPct = (val) => `${val.toFixed(2)}%`;
+  const tooltipFormatter = (value, name) => {
+    if (name.includes('Conv') || name.includes('Andhra') || name.includes('VJA') || name.includes('GOV') || name.includes('GVM') || name.includes('IBM')) {
+      return [`${Number(value).toFixed(2)}%`, name.replace('_Conv', ' Conv%')];
+    }
+    return [value.toLocaleString(), name.replace('_Del', ' DEL Volume')];
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-50 p-4 md:p-8 text-slate-800" style={{ fontFamily: "'Averia Serif Libre', serif" }}>
+      <style>
+        {`@import url('https://fonts.googleapis.com/css2?family=Averia+Serif+Libre:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap');
+          * { font-family: 'Averia Serif Libre', serif; }
+          .recharts-default-tooltip { border-radius: 8px !important; border: none !important; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1) !important; }
+        `}
+      </style>
+      
+      <div className="max-w-6xl mx-auto space-y-6">
+        
+        {/* Header Section */}
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
+              <Map className="w-8 h-8 text-blue-600" />
+              Andhra Pradesh Performance Analysis
+            </h1>
+            <p className="text-slate-500 mt-1">7-Week Conversion & Volume Tracking</p>
+          </div>
+          <div className="flex flex-wrap gap-2 bg-slate-100 p-1 rounded-lg">
+            {['overall', 'prepaid', 'dh-odh', 'analysis', 'vijayawada', 'overall-summary'].map(tab => (
+              <button 
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-all capitalize ${
+                  activeTab === tab 
+                    ? 'bg-white shadow-sm text-blue-700' 
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                {tab.replace('-', ' ')}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* KPI Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
+            <div className="p-4 bg-blue-50 text-blue-600 rounded-xl"><Activity className="w-6 h-6" /></div>
+            <div>
+              <p className="text-sm font-medium text-slate-500">{activeTab === 'prepaid' ? 'Prepaid Conv.' : 'Overall Conv.'}</p>
+              <h2 className="text-2xl font-bold text-slate-900">{weightedAvgConv}%</h2>
+            </div>
+          </div>
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
+            <div className="p-4 bg-purple-50 text-purple-600 rounded-xl"><TrendingUp className="w-6 h-6" /></div>
+            <div>
+              <p className="text-sm font-medium text-slate-500">Current ({currentWeek.week})</p>
+              <h2 className="text-2xl font-bold text-slate-900">{currentWeek.conv.toFixed(2)}%</h2>
+            </div>
+          </div>
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
+            <div className="p-4 bg-emerald-50 text-emerald-600 rounded-xl"><CheckCircle2 className="w-6 h-6" /></div>
+            <div>
+              <p className="text-sm font-medium text-slate-500">Total DEL Volume</p>
+              <h2 className="text-2xl font-bold text-slate-900">{totalDel.toLocaleString()}</h2>
+            </div>
+          </div>
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
+            <div className="p-4 bg-indigo-50 text-indigo-600 rounded-xl"><BarChart2 className="w-6 h-6" /></div>
+            <div>
+              <p className="text-sm font-medium text-slate-500">Peak ({peakConvData.week})</p>
+              <h2 className="text-2xl font-bold text-slate-900">{peakConvData.conv.toFixed(2)}%</h2>
+            </div>
+          </div>
+        </div>
+
+        {/* TAB 1: OVERALL */}
+        {activeTab === 'overall' && (
+          <div className="space-y-6">
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+              <h3 className="text-lg font-bold mb-6 flex items-center gap-2"><TrendingUp className="w-5 h-5 text-slate-400" /> State Level (Overall): Volume vs. Conversion Rate</h3>
+              <div className="h-[400px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <ComposedChart data={stateData} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                    <XAxis dataKey="week" tick={{fill: '#64748b'}} axisLine={false} tickLine={false} />
+                    <YAxis yAxisId="left" tickFormatter={formatVol} tick={{fill: '#64748b'}} axisLine={false} tickLine={false} />
+                    <YAxis yAxisId="right" orientation="right" domain={[72, 82]} tickFormatter={formatPct} tick={{fill: '#64748b'}} axisLine={false} tickLine={false} />
+                    <Tooltip formatter={tooltipFormatter} />
+                    <Legend wrapperStyle={{ paddingTop: '20px' }} />
+                    <Bar yAxisId="left" dataKey="total" fill="#e2e8f0" name="Total Volume" radius={[4, 4, 0, 0]} maxBarSize={50} />
+                    <Bar yAxisId="left" dataKey="del" fill="#3b82f6" name="DEL Volume" radius={[4, 4, 0, 0]} maxBarSize={50} />
+                    <Line yAxisId="right" type="monotone" dataKey="conv" stroke="#ef4444" strokeWidth={3} name="Conversion %" dot={{ r: 4 }} activeDot={{ r: 6 }} />
+                  </ComposedChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+              <h3 className="text-lg font-bold mb-6 flex items-center gap-2"><Activity className="w-5 h-5 text-slate-400" /> Regional Breakdown (Overall)</h3>
+              <div className="h-[350px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={regionData} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                    <XAxis dataKey="week" tick={{fill: '#64748b'}} axisLine={false} tickLine={false} />
+                    <YAxis domain={[73, 82]} tickFormatter={formatPct} tick={{fill: '#64748b'}} axisLine={false} tickLine={false} />
+                    <Tooltip formatter={tooltipFormatter} />
+                    <Legend wrapperStyle={{ paddingTop: '20px' }} />
+                    <Line type="monotone" dataKey="Andhra-1" stroke="#2563eb" strokeWidth={3} dot={{ r: 4 }} />
+                    <Line type="monotone" dataKey="Andhra-2" stroke="#f59e0b" strokeWidth={3} dot={{ r: 4 }} />
+                    <Line type="monotone" dataKey="Andhra-3" stroke="#10b981" strokeWidth={3} dot={{ r: 4 }} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 2: PREPAID */}
+        {activeTab === 'prepaid' && (
+          <div className="space-y-6">
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+              <h3 className="text-lg font-bold mb-6 flex items-center gap-2"><CreditCard className="w-5 h-5 text-slate-400" /> State Level (Prepaid): Volume vs. Conversion Rate</h3>
+              <div className="h-[400px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <ComposedChart data={prepaidStateData} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                    <XAxis dataKey="week" tick={{fill: '#64748b'}} axisLine={false} tickLine={false} />
+                    <YAxis yAxisId="left" tickFormatter={formatVol} tick={{fill: '#64748b'}} axisLine={false} tickLine={false} />
+                    <YAxis yAxisId="right" orientation="right" domain={[90, 97]} tickFormatter={formatPct} tick={{fill: '#64748b'}} axisLine={false} tickLine={false} />
+                    <Tooltip formatter={tooltipFormatter} />
+                    <Legend wrapperStyle={{ paddingTop: '20px' }} />
+                    <Bar yAxisId="left" dataKey="total" fill="#e2e8f0" name="Total Volume" radius={[4, 4, 0, 0]} maxBarSize={50} />
+                    <Bar yAxisId="left" dataKey="del" fill="#8b5cf6" name="DEL Volume" radius={[4, 4, 0, 0]} maxBarSize={50} />
+                    <Line yAxisId="right" type="monotone" dataKey="conv" stroke="#ef4444" strokeWidth={3} name="Conversion %" dot={{ r: 4 }} activeDot={{ r: 6 }} />
+                  </ComposedChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+              <h3 className="text-lg font-bold mb-6 flex items-center gap-2"><Activity className="w-5 h-5 text-slate-400" /> Regional Breakdown (Prepaid)</h3>
+              <div className="h-[350px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={prepaidRegionData} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                    <XAxis dataKey="week" tick={{fill: '#64748b'}} axisLine={false} tickLine={false} />
+                    <YAxis domain={[91, 97]} tickFormatter={formatPct} tick={{fill: '#64748b'}} axisLine={false} tickLine={false} />
+                    <Tooltip formatter={tooltipFormatter} />
+                    <Legend wrapperStyle={{ paddingTop: '20px' }} />
+                    <Line type="monotone" dataKey="Andhra-1" stroke="#2563eb" strokeWidth={3} dot={{ r: 4 }} />
+                    <Line type="monotone" dataKey="Andhra-2" stroke="#f59e0b" strokeWidth={3} dot={{ r: 4 }} />
+                    <Line type="monotone" dataKey="Andhra-3" stroke="#10b981" strokeWidth={3} dot={{ r: 4 }} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 3: DH vs ODH */}
+        {activeTab === 'dh-odh' && (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                <h3 className="text-lg font-bold mb-6 flex items-center gap-2"><GitCompare className="w-5 h-5 text-slate-400" /> Conversion Rate (DH vs MDH vs ODH)</h3>
+                <div className="h-[350px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={modelData} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                      <XAxis dataKey="week" tick={{fill: '#64748b'}} axisLine={false} tickLine={false} />
+                      <YAxis domain={[72, 81]} tickFormatter={formatPct} tick={{fill: '#64748b'}} axisLine={false} tickLine={false} />
+                      <Tooltip formatter={tooltipFormatter} />
+                      <Legend wrapperStyle={{ paddingTop: '20px' }} />
+                      <Line type="monotone" dataKey="DH_Conv" name="DH" stroke="#2563eb" strokeWidth={3} dot={{ r: 4 }} />
+                      <Line type="monotone" dataKey="MDH_Conv" name="MDH" stroke="#f59e0b" strokeWidth={3} dot={{ r: 4 }} />
+                      <Line type="monotone" dataKey="ODH_Conv" name="ODH" stroke="#10b981" strokeWidth={3} dot={{ r: 4 }} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+              <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                <h3 className="text-lg font-bold mb-6 flex items-center gap-2"><BarChart2 className="w-5 h-5 text-slate-400" /> DEL Volume Distribution</h3>
+                <div className="h-[350px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={modelData} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                      <XAxis dataKey="week" tick={{fill: '#64748b'}} axisLine={false} tickLine={false} />
+                      <YAxis tickFormatter={formatVol} tick={{fill: '#64748b'}} axisLine={false} tickLine={false} />
+                      <Tooltip formatter={tooltipFormatter} />
+                      <Legend wrapperStyle={{ paddingTop: '20px' }} />
+                      <Bar dataKey="DH_Del" name="DH" stackId="a" fill="#2563eb" radius={[0, 0, 4, 4]} />
+                      <Bar dataKey="ODH_Del" name="ODH" stackId="a" fill="#10b981" />
+                      <Bar dataKey="MDH_Del" name="MDH" stackId="a" fill="#f59e0b" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+              <h3 className="text-xl font-bold mb-4 flex items-center gap-2"><Lightbulb className="w-6 h-6 text-amber-500" /> Hub Model Analysis</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                  <h4 className="font-bold text-slate-800 mb-2">1. The DH Volume Anchor</h4>
+                  <p className="text-sm text-slate-600 leading-relaxed">DH carry approximately <span className="font-semibold text-blue-600">78-80%</span> of the state's total volume. The state's overall conversion rate is almost entirely dictated by DH performance.</p>
+                </div>
+                <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                  <h4 className="font-bold text-slate-800 mb-2">2. Systemic Macro Trends</h4>
+                  <p className="text-sm text-slate-600 leading-relaxed">All three models crashed in Week 3. This confirms W3's failure was heavily driven by the <span className="font-semibold text-slate-800">Festival impact across the state</span> rather than localized inefficiency.</p>
+                </div>
+                <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                  <h4 className="font-bold text-slate-800 mb-2">3. MDH Volatility</h4>
+                  <p className="text-sm text-slate-600 leading-relaxed">MDH handle the smallest volume (~<span className="font-semibold text-amber-600">3%</span>) but show the highest volatility. During the W3 crash, MDH conversion dropped lowest to <span className="font-semibold text-red-600">73.62%</span>.</p>
+                </div>
+                <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                  <h4 className="font-bold text-slate-800 mb-2">4. Performance Hierarchy</h4>
+                  <p className="text-sm text-slate-600 leading-relaxed">There is a consistent hierarchy: <span className="font-semibold text-blue-600">DH &gt; ODH &gt; MDH</span>. DH consistently convert 0.5% to 1.5% better than ODH operations.</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 overflow-x-auto">
+              <h3 className="text-lg font-bold mb-4">Hub Model Raw Data</h3>
+              <table className="w-full text-sm text-left">
+                <thead className="bg-slate-50 text-slate-600 font-medium">
+                  <tr>
+                    <th className="px-4 py-3 rounded-tl-lg">Week</th>
+                    <th className="px-4 py-3 text-blue-600">DH DEL</th>
+                    <th className="px-4 py-3 text-blue-600 font-bold">DH Conv%</th>
+                    <th className="px-4 py-3 text-emerald-600">ODH DEL</th>
+                    <th className="px-4 py-3 text-emerald-600 font-bold">ODH Conv%</th>
+                    <th className="px-4 py-3 text-amber-600">MDH DEL</th>
+                    <th className="px-4 py-3 text-amber-600 font-bold rounded-tr-lg">MDH Conv%</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-slate-700">
+                  {modelData.map((row) => (
+                    <tr key={row.week} className="hover:bg-slate-50">
+                      <td className="px-4 py-3 font-medium">{row.week}</td>
+                      <td className="px-4 py-3">{row.DH_Del.toLocaleString()}</td>
+                      <td className="px-4 py-3 font-semibold">{row.DH_Conv.toFixed(2)}%</td>
+                      <td className="px-4 py-3">{row.ODH_Del.toLocaleString()}</td>
+                      <td className="px-4 py-3 font-semibold">{row.ODH_Conv.toFixed(2)}%</td>
+                      <td className="px-4 py-3">{row.MDH_Del.toLocaleString()}</td>
+                      <td className="px-4 py-3 font-semibold">{row.MDH_Conv.toFixed(2)}%</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 4: ANALYSIS */}
+        {activeTab === 'analysis' && (
+          <div className="space-y-6">
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+              <h3 className="text-xl font-bold mb-4 flex items-center gap-2"><AlertCircle className="w-6 h-6 text-blue-600" /> Key Strategic Insights</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-6">
+                <div className="space-y-4">
+                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                    <h4 className="font-bold text-slate-800 mb-2">1. The Week 2 Surge</h4>
+                    <p className="text-sm text-slate-600 leading-relaxed">Week 2 is an operational outlier. Total Volume peaked at <span className="font-semibold text-slate-800">1.96M</span>, and the state achieved its highest conversion of <span className="font-semibold text-slate-800">79.71%</span>.</p>
+                  </div>
+                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                    <h4 className="font-bold text-slate-800 mb-2">2. The Week 3 Drop (Festival Impact)</h4>
+                    <p className="text-sm text-slate-600 leading-relaxed">Week 3 saw a sharp decline in volume and conversion rate (down to <span className="font-semibold text-red-600">74.93%</span>). This was primarily due to the <span className="font-semibold text-slate-800">Festival impact across the state</span>.</p>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                    <h4 className="font-bold text-slate-800 mb-2">3. Regional Disparities</h4>
+                    <p className="text-sm text-slate-600 leading-relaxed"><span className="font-semibold text-blue-600">Andhra-1</span> consistently outperforms, maxing out at <span className="font-semibold text-slate-800">81.00%</span> in W2. <span className="font-semibold text-amber-600">Andhra-2</span> acts as a drag on the state average.</p>
+                  </div>
+                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                    <h4 className="font-bold text-slate-800 mb-2">4. Strong Recovery Trend</h4>
+                    <p className="text-sm text-slate-600 leading-relaxed">From W4 to W7, the state demonstrated operational resilience following festival disruptions, climbing back to <span className="font-semibold text-slate-800">79.03%</span>.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 overflow-x-auto">
+              <h3 className="text-lg font-bold mb-4">Overall Raw Data Summary</h3>
+              <table className="w-full text-sm text-left">
+                <thead className="bg-slate-50 text-slate-600 font-medium">
+                  <tr>
+                    <th className="px-4 py-3 rounded-tl-lg">Week</th>
+                    <th className="px-4 py-3">Total Volume</th>
+                    <th className="px-4 py-3">DEL Volume</th>
+                    <th className="px-4 py-3">State Conv%</th>
+                    <th className="px-4 py-3 text-blue-600">Andhra-1</th>
+                    <th className="px-4 py-3 text-amber-600">Andhra-2</th>
+                    <th className="px-4 py-3 text-emerald-600 rounded-tr-lg">Andhra-3</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-slate-700">
+                  {stateData.map((row, i) => (
+                    <tr key={row.week} className="hover:bg-slate-50">
+                      <td className="px-4 py-3 font-medium">{row.week}</td>
+                      <td className="px-4 py-3">{row.total.toLocaleString()}</td>
+                      <td className="px-4 py-3">{row.del.toLocaleString()}</td>
+                      <td className="px-4 py-3 font-semibold">{row.conv.toFixed(2)}%</td>
+                      <td className="px-4 py-3">{regionData[i]['Andhra-1'].toFixed(2)}%</td>
+                      <td className="px-4 py-3">{regionData[i]['Andhra-2'].toFixed(2)}%</td>
+                      <td className="px-4 py-3">{regionData[i]['Andhra-3'].toFixed(2)}%</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 5: VIJAYAWADA CHRONIC */}
+        {activeTab === 'vijayawada' && (
+          <div className="space-y-6">
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+              <h3 className="text-lg font-bold mb-6 flex items-center gap-2"><MapPin className="w-5 h-5 text-slate-400" /> Chronic Hub Conversion Trends (Vijayawada Area)</h3>
+              <div className="h-[450px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={vjaChartData} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                    <XAxis dataKey="week" tick={{fill: '#64748b'}} axisLine={false} tickLine={false} />
+                    <YAxis domain={[55, 80]} tickFormatter={formatPct} tick={{fill: '#64748b'}} axisLine={false} tickLine={false} />
+                    <Tooltip formatter={tooltipFormatter} />
+                    <Legend wrapperStyle={{ paddingTop: '20px' }} />
+                    {chronicHubs.map(hub => (
+                      <Line key={hub.key} type="monotone" dataKey={hub.key} name={hub.name.split('_')[1] || hub.name} stroke={hub.color} strokeWidth={2} dot={{ r: 4 }} />
+                    ))}
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+              <h3 className="text-xl font-bold mb-4 flex items-center gap-2"><AlertCircle className="w-6 h-6 text-red-500" /> Vijayawada Hub Analysis</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                  <h4 className="font-bold text-slate-800 mb-2">1. The Split Hubs Crisis</h4>
+                  <p className="text-sm text-slate-600 leading-relaxed"><span className="font-semibold text-slate-800">VijayawadaSplitODH_VJA1</span> and <span className="font-semibold text-slate-800">VJA2</span> are chronically underperforming. VJA1 hit an abysmal <span className="font-semibold text-red-600">58.82%</span> in Week 5.</p>
+                </div>
+                <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                  <h4 className="font-bold text-slate-800 mb-2">2. Gannavaram Struggles</h4>
+                  <p className="text-sm text-slate-600 leading-relaxed"><span className="font-semibold text-slate-800">GannavaramHub_GVM</span> failed to break the 66% ceiling from Week 3 through Week 7, showing chronic structural constraints.</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 overflow-x-auto">
+              <h3 className="text-lg font-bold mb-4">Vijayawada Chronic Hubs - Week-by-Week</h3>
+              <table className="w-full text-sm text-left whitespace-nowrap">
+                <thead className="bg-slate-50 text-slate-600 font-medium">
+                  <tr>
+                    <th className="px-4 py-3 rounded-tl-lg">Hub Name (AP-1)</th>
+                    <th className="px-4 py-3">Week 1</th>
+                    <th className="px-4 py-3">Week 2</th>
+                    <th className="px-4 py-3 text-red-600">Week 3</th>
+                    <th className="px-4 py-3">Week 4</th>
+                    <th className="px-4 py-3">Week 5</th>
+                    <th className="px-4 py-3">Week 6</th>
+                    <th className="px-4 py-3 rounded-tr-lg">Week 7</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-slate-700">
+                  {chronicHubs.map(hub => (
+                    <tr key={hub.key} className="hover:bg-slate-50">
+                      <td className="px-4 py-3 font-semibold text-slate-800">{hub.name}</td>
+                      {hub.data.map((val, idx) => {
+                        const isW3 = idx === 2;
+                        const isBad = val < 65;
+                        return (
+                          <td key={idx} className={`px-4 py-3 ${isBad ? 'text-red-600 font-bold' : isW3 ? 'font-medium' : ''}`}>
+                            {val.toFixed(2)}%
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 6: OVERALL SUMMARY (NEW) */}
+        {activeTab === 'overall-summary' && (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Top 5 Improved Hubs */}
+              <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-emerald-600">
+                  <TrendingUp className="w-5 h-5" /> Top 5 Improved Hubs (W6 vs W7)
+                </h3>
+                <ul className="space-y-3">
+                  <li className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                    <span className="font-semibold text-slate-700">AganampudiHub_VTZ</span>
+                    <span className="text-emerald-600 font-bold bg-emerald-50 px-3 py-1 rounded-md">+1.32%</span>
+                  </li>
+                  <li className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                    <span className="font-semibold text-slate-700">EluruHub_ELU</span>
+                    <span className="text-emerald-600 font-bold bg-emerald-50 px-3 py-1 rounded-md">+1.01%</span>
+                  </li>
+                  <li className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                    <span className="font-semibold text-slate-700">VijayawadaSplitODH_VJA1</span>
+                    <span className="text-emerald-600 font-bold bg-emerald-50 px-3 py-1 rounded-md">+0.96%</span>
+                  </li>
+                  <li className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                    <span className="font-semibold text-slate-700">AnakapalliHub_AKP</span>
+                    <span className="text-emerald-600 font-bold bg-emerald-50 px-3 py-1 rounded-md">+0.88%</span>
+                  </li>
+                  <li className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                    <span className="font-semibold text-slate-700">NandyalHub_NDL</span>
+                    <span className="text-emerald-600 font-bold bg-emerald-50 px-3 py-1 rounded-md">+0.74%</span>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Top 5 Dented Hubs */}
+              <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-red-600">
+                  <TrendingDown className="w-5 h-5" /> Top 5 Dented Hubs (W6 vs W7)
+                </h3>
+                <ul className="space-y-3">
+                  <li className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                    <span className="font-semibold text-slate-700">BiwiNagarHub_NLR</span>
+                    <span className="text-red-600 font-bold bg-red-50 px-3 py-1 rounded-md">-2.04%</span>
+                  </li>
+                  <li className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                    <span className="font-semibold text-slate-700">VijayawadaSplitODH_VJA2</span>
+                    <span className="text-red-600 font-bold bg-red-50 px-3 py-1 rounded-md">-1.59%</span>
+                  </li>
+                  <li className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                    <span className="font-semibold text-slate-700">KurnoolHub_KRN</span>
+                    <span className="text-red-600 font-bold bg-red-50 px-3 py-1 rounded-md">-1.59%</span>
+                  </li>
+                  <li className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                    <span className="font-semibold text-slate-700">AnanthapurHub_ATP</span>
+                    <span className="text-red-600 font-bold bg-red-50 px-3 py-1 rounded-md">-1.04%</span>
+                  </li>
+                  <li className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                    <span className="font-semibold text-slate-700">ProdatturHub_PDT</span>
+                    <span className="text-red-600 font-bold bg-red-50 px-3 py-1 rounded-md">-0.65%</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Executive Data Summary */}
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+              <h3 className="text-xl font-bold mb-4 flex items-center gap-2"><FileText className="w-6 h-6 text-indigo-600" /> Executive Data Summary (Overall vs. PP vs. COD)</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                  <h4 className="font-bold text-slate-800 mb-2">1. The Prepaid vs. COD Divide is Massive</h4>
+                  <p className="text-sm text-slate-600 leading-relaxed">
+                    Prepaid conversion is consistently phenomenal (averaging <span className="font-semibold text-blue-600">94%–95%</span>), whereas COD conversion acts as a massive anchor (hovering in the <span className="font-semibold text-red-600">low 70s</span>). A hub's overall conversion is highly dependent on its localized Prepaid-to-COD order ratio.
+                  </p>
+                </div>
+                <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                  <h4 className="font-bold text-slate-800 mb-2">2. The W3 "Festival Crash" was COD-Centric</h4>
+                  <p className="text-sm text-slate-600 leading-relaxed">
+                    During the Week 3 festival impact, Overall conversion dropped by ~5%. However, Prepaid conversion only dropped by ~3%. This proves the disruption was predominantly caused by <span className="font-semibold text-slate-800">COD delivery failures</span> (customers traveling/unavailable to pay cash) rather than pure network operational failures.
+                  </p>
+                </div>
+                <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                  <h4 className="font-bold text-slate-800 mb-2">3. Vijayawada Split Hubs Crisis = COD Failure</h4>
+                  <p className="text-sm text-slate-600 leading-relaxed">
+                    For chronic underperformers like VJA1 and VJA2, their Prepaid numbers remain resilient compared to their Overall numbers. The severe drops are driven by massive failures in delivering COD packages, pointing directly to localized issues with cash handling, rider availability, or fraudulent COD spikes.
+                  </p>
+                </div>
+                <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                  <h4 className="font-bold text-slate-800 mb-2">4. Week 7 Geographic Headwinds</h4>
+                  <p className="text-sm text-slate-600 leading-relaxed">
+                    Three of the worst-performing dented hubs in Week 7 (Kurnool, Ananthapur, Prodattur) are geographically clustered in the <span className="font-semibold text-amber-600">Rayalaseema region</span>. This synchronized drop suggests a localized macro-issue (e.g., regional routing delays, localized strikes) rather than random hub-level inefficiencies.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+      </div>
+    </div>
+  );
+}
